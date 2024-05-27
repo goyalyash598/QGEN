@@ -1,0 +1,40 @@
+name: Deploy Streamlit App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create Streamlit config directory
+      run: |
+        mkdir -p ~/.streamlit/
+      shell: bash
+
+    - name: Add secrets.toml
+      run: |
+        echo "${{ secrets.SECRETS_TOML }}" > ~/.streamlit/secrets.toml
+
+    - name: Run Streamlit
+      run: |
+        streamlit run your_streamlit_script.py
