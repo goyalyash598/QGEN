@@ -2,5 +2,5 @@ streamlit
 pymongo
 Pillow
 PyMuPDF
-google-cloud
+google-generativeai
 PyPDF2
