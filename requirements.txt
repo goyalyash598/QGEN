@@ -1,4 +1,6 @@
 streamlit
-PyPDF2
-google-generativeai
 pymongo
+Pillow
+PyMuPDF
+google-cloud
+PyPDF2
