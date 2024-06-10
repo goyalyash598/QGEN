@@ -4,11 +4,11 @@ import google.generativeai as genai
 import json
 import http.client
 
-# Configure API key for generative AI
+
 api_key = st.secrets["api_keys"]["genai_api_key"]
 genai.configure(api_key=api_key)
 
-# Set up generative model
+
 model = genai.GenerativeModel("gemini-1.5-pro", generation_config={
     "temperature": 0.3,
     "max_output_tokens": 4096
@@ -19,7 +19,7 @@ model = genai.GenerativeModel("gemini-1.5-pro", generation_config={
     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
 ])
 
-# MongoDB connection
+
 mongo_connection_string = st.secrets["mongo"]["connection_string"]
 client = MongoClient(mongo_connection_string)
 db = client.questions_db
@@ -98,7 +98,7 @@ def send_insomnia_request(question,question_type):
     res = conn.getresponse()
     data = res.read()
 
-    # Debugging logs
+
     print("Request Payload:", payload)
     print("Response Status:", res.status)
     print("Response Data:", data.decode("utf-8"))
@@ -116,7 +116,7 @@ def save_questions_to_db(questions, question_type):
     jsonString = f"[{jsonString[index1:index2 + 1]}]"
     jsonString = jsonString.replace("'", '')
 
-    # Debugging logs
+    
     print("Generated JSON String:", jsonString)
 
     try:
@@ -126,7 +126,7 @@ def save_questions_to_db(questions, question_type):
         print(f"JSON Decode Error: {e}")
         return
 
-    # Debugging logs
+    
     print("JSON Object:", jsonObject)
 
     questions_collection.insert_many(jsonObject)
