@@ -278,7 +278,7 @@ if generate_questions_flag or st.session_state.proceed_with_text_only:
 
 
 
-# if st.sidebar.button("Show All Questions"):
+ if st.sidebar.button("Show All Questions"):
 #     all_questions = get_all_questions()
 #     st.markdown("### All Stored Questions")
 #     for question in all_questions:
