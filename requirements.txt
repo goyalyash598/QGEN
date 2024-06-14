@@ -4,4 +4,6 @@ Pillow
 PyMuPDF
 google-generativeai
 PyPDF2
+anthropic
+openai
 
