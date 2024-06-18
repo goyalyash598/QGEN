@@ -1,3 +1,4 @@
+from PyPDF2 import PdfReader, PdfWriter
 import streamlit as st
 from pre_processing import *
 from database import *
@@ -5,9 +6,6 @@ from PIL import Image
 import pytesseract
 import pdfplumber
 import os
-
-# Set TESSDATA_PREFIX to the location of tessdata directory
-os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
@@ -44,17 +42,14 @@ language = st.sidebar.selectbox("Select Language of the Questions", ("English", 
 num_questions = st.sidebar.number_input("Number of questions to generate", min_value=1, max_value=20, value=10)
 
 generate_questions_flag = st.sidebar.button("Generate Questions")
+json_object = None
 
 def ocr_from_pdf(file_path):
     text = ""
     with pdfplumber.open(file_path) as pdf:
         for i, page in enumerate(pdf.pages):
             image = page.to_image()
-            # Use 'hin' language for Hindi OCR
-            if language == "Hindi":
-                page_text = pytesseract.image_to_string(image.original, lang='hin')
-            else:
-                page_text = pytesseract.image_to_string(image.original)
+            page_text = pytesseract.image_to_string(image.original, lang='hin')
             text += page_text + "\n\n"  # Add some spacing between pages
             print(f"Extracted text from page {i + 1}:\n", page_text)
             print("\n" + "="*80 + "\n")  # Separator for better readability
@@ -62,25 +57,26 @@ def ocr_from_pdf(file_path):
 
 if generate_questions_flag:
     if input_type == "PDF File":
-        if pdf_file is None:
-            st.error("Please upload a PDF file.")
-        else:
-            if pdf_file != st.session_state.uploaded_pdf:
-                with st.spinner("Extracting text and images from PDF..."):
+        if pdf_file != st.session_state.uploaded_pdf:
+            with st.spinner("Extracting text and images from PDF..."):
+                if language == "Hindi":
                     combined_text = ocr_from_pdf(pdf_file)
-                    save_data_to_db(combined_text)
-                st.session_state.uploaded_pdf = pdf_file
+                else:
+                    combined_text = handle_pdf_file(pdf_file, model, m)
+                save_data_to_db(combined_text)
+            st.session_state.uploaded_pdf = pdf_file
+        combined_text = get_data()
+        if combined_text:
+            with st.spinner("Generating questions..."):
+                questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
+        else:
+            st.write("No data available. Upload File again")
+        
+        st.success("Questions generated successfully!")
+        st.markdown("### Generated Questions")
+        st.write(questions)
+        save_questions_to_db(questions, question_type)
 
-            combined_text = get_data()
-            if combined_text:
-                with st.spinner("Generating questions..."):
-                    questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
-                    st.success("Questions generated successfully!")
-                    st.markdown("### Generated Questions")
-                    st.write(questions)
-                    save_questions_to_db(questions, question_type)
-            else:
-                st.write("No data available. Upload File again")
     elif input_type == "Text Input" and text_input:
         combined_text = text_input
         save_data_to_db(combined_text)
@@ -88,14 +84,16 @@ if generate_questions_flag:
         if combined_text:
             with st.spinner("Generating questions..."):
                 questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
-                st.success("Questions generated successfully!")
-                st.markdown("### Generated Questions")
-                st.write(questions)
-                save_questions_to_db(questions, question_type)
         else:
             st.write("No data available. Upload File again")
+        
+        st.success("Questions generated successfully!")
+        st.markdown("### Generated Questions")
+        st.write(questions)
+        save_questions_to_db(questions, question_type)
     else:
         st.error("Please upload a PDF file or enter text, and enter a prompt.")
+        combined_text = None
 
 if st.sidebar.button("Show All Questions"):
     if buffer_collection.count_documents({}) == 0:
@@ -119,7 +117,6 @@ if st.sidebar.button("Show All Questions"):
 
 if st.sidebar.button("Send API Request"):
     store_in_api()
-
 
 st.sidebar.markdown("<h2>PDF Splitter</h2>", unsafe_allow_html=True)
 split_pdf_file = st.sidebar.file_uploader("Upload a PDF file for splitting", type=["pdf"])
