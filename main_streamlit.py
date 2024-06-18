@@ -7,7 +7,7 @@ import pdfplumber
 import os
 
 # Set TESSDATA_PREFIX to the location of tessdata directory
-os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/4.00/'
+os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
