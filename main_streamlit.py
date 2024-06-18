@@ -1,4 +1,3 @@
-from PyPDF2 import PdfReader, PdfWriter
 import streamlit as st
 from pre_processing import *
 from database import *
@@ -6,6 +5,9 @@ from PIL import Image
 import pytesseract
 import pdfplumber
 import os
+
+# Set TESSDATA_PREFIX to the location of tessdata directory
+os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/4.00/'
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
@@ -49,6 +51,7 @@ def ocr_from_pdf(file_path):
     with pdfplumber.open(file_path) as pdf:
         for i, page in enumerate(pdf.pages):
             image = page.to_image()
+            # Use 'hin' language for Hindi OCR
             page_text = pytesseract.image_to_string(image.original, lang='hin')
             text += page_text + "\n\n"  # Add some spacing between pages
             print(f"Extracted text from page {i + 1}:\n", page_text)
@@ -117,6 +120,7 @@ if st.sidebar.button("Show All Questions"):
 
 if st.sidebar.button("Send API Request"):
     store_in_api()
+
 
 st.sidebar.markdown("<h2>PDF Splitter</h2>", unsafe_allow_html=True)
 split_pdf_file = st.sidebar.file_uploader("Upload a PDF file for splitting", type=["pdf"])
