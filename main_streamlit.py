@@ -1,5 +1,5 @@
 import os
-os.environ["TESSDATA_PREFIX"] = "C:/Program Files/Tesseract-OCR/tessdata"  # Update with the correct path
+os.environ["TESSDATA_PREFIX"] = "C:/Program Files/Tesseract-OCR/tessdata/hin.traineddata"  # Update with the correct path
 
 from PyPDF2 import PdfReader, PdfWriter
 import streamlit as st
