@@ -44,7 +44,6 @@ language = st.sidebar.selectbox("Select Language of the Questions", ("English", 
 num_questions = st.sidebar.number_input("Number of questions to generate", min_value=1, max_value=20, value=10)
 
 generate_questions_flag = st.sidebar.button("Generate Questions")
-json_object = None
 
 def ocr_from_pdf(file_path):
     text = ""
@@ -52,7 +51,10 @@ def ocr_from_pdf(file_path):
         for i, page in enumerate(pdf.pages):
             image = page.to_image()
             # Use 'hin' language for Hindi OCR
-            page_text = pytesseract.image_to_string(image.original, lang='hin')
+            if language == "Hindi":
+                page_text = pytesseract.image_to_string(image.original, lang='hin')
+            else:
+                page_text = pytesseract.image_to_string(image.original)
             text += page_text + "\n\n"  # Add some spacing between pages
             print(f"Extracted text from page {i + 1}:\n", page_text)
             print("\n" + "="*80 + "\n")  # Separator for better readability
@@ -60,26 +62,25 @@ def ocr_from_pdf(file_path):
 
 if generate_questions_flag:
     if input_type == "PDF File":
-        if pdf_file != st.session_state.uploaded_pdf:
-            with st.spinner("Extracting text and images from PDF..."):
-                if language == "Hindi":
-                    combined_text = ocr_from_pdf(pdf_file)
-                else:
-                    combined_text = handle_pdf_file(pdf_file, model, m)
-                save_data_to_db(combined_text)
-            st.session_state.uploaded_pdf = pdf_file
-        combined_text = get_data()
-        if combined_text:
-            with st.spinner("Generating questions..."):
-                questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
+        if pdf_file is None:
+            st.error("Please upload a PDF file.")
         else:
-            st.write("No data available. Upload File again")
-        
-        st.success("Questions generated successfully!")
-        st.markdown("### Generated Questions")
-        st.write(questions)
-        save_questions_to_db(questions, question_type)
+            if pdf_file != st.session_state.uploaded_pdf:
+                with st.spinner("Extracting text and images from PDF..."):
+                    combined_text = ocr_from_pdf(pdf_file)
+                    save_data_to_db(combined_text)
+                st.session_state.uploaded_pdf = pdf_file
 
+            combined_text = get_data()
+            if combined_text:
+                with st.spinner("Generating questions..."):
+                    questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
+                    st.success("Questions generated successfully!")
+                    st.markdown("### Generated Questions")
+                    st.write(questions)
+                    save_questions_to_db(questions, question_type)
+            else:
+                st.write("No data available. Upload File again")
     elif input_type == "Text Input" and text_input:
         combined_text = text_input
         save_data_to_db(combined_text)
@@ -87,16 +88,14 @@ if generate_questions_flag:
         if combined_text:
             with st.spinner("Generating questions..."):
                 questions = generate_questions(model, m, combined_text, prompt, question_type, question_level, bloom, language, num_questions)
+                st.success("Questions generated successfully!")
+                st.markdown("### Generated Questions")
+                st.write(questions)
+                save_questions_to_db(questions, question_type)
         else:
             st.write("No data available. Upload File again")
-        
-        st.success("Questions generated successfully!")
-        st.markdown("### Generated Questions")
-        st.write(questions)
-        save_questions_to_db(questions, question_type)
     else:
         st.error("Please upload a PDF file or enter text, and enter a prompt.")
-        combined_text = None
 
 if st.sidebar.button("Show All Questions"):
     if buffer_collection.count_documents({}) == 0:
