@@ -83,7 +83,7 @@ def send_insomnia_request(question):
     return data.decode("utf-8"), res.status
 
 def save_questions_to_db(questions, question_type):
-    
+    # print(type(questions))
     if(question_type=="MCQ"):
         pattern = re.compile(r'\*\*Question \d+:\*\* (.*?)\n\*\*Options:\*\*\n'
     r'a\) (.*?)\n'
