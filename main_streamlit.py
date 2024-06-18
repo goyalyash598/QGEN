@@ -7,6 +7,7 @@ from pre_processing import *
 from database import *
 from PIL import Image
 import pytesseract
+import pdfplumber
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
