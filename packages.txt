@@ -1,1 +1,4 @@
 tesseract-ocr
+tesseract-ocr-hin
+poppler-utils
+
