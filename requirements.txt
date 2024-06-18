@@ -11,3 +11,4 @@ pdfplumber
 numpy
 pandas
 requests
+streamlit-component-base>=1.0.0
