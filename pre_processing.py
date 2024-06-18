@@ -152,6 +152,7 @@ def combine_images(images, mode='vertical'):
             y_offset = (idx // cols) * max_height
             combined_image.paste(img, (x_offset, y_offset))
 
+    print(type(combined_image))
     return combined_image
 
 def handle_pdf_file(pdf_file,model,m):
@@ -236,24 +237,26 @@ def model_selection(m):
             )
         return model
     
-def generate_questions(model,m, combined_text, prompt, question_type, num_questions=10):
+def generate_questions(model,m, combined_text, prompt, question_type,question_level, bloom,language, num_questions=10):
     if question_type == "Descriptive":
-        user_prompt = f"{prompt}\n\nBased on the following text, generate {num_questions} detailed descriptive questions with correct answer only:\n\n{combined_text}.\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Answer:\*\*\s(.*?)(?:\n\n|\n$)"
+        user_prompt = f"{prompt}\n\nBased on the following text, generate {num_questions} detailed descriptive questions of {question_level} Difficulty Level with correct answer only, Also ensure the the questions are {bloom} based as per Bloom's Taxonomy:\n\n{combined_text}.The questions should be in this {language}.\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Answer:\*\*\s(.*?)(?:\n\n|\n$)"
     elif question_type == "MCQ":
-        user_prompt = f"""{prompt}\n\nBased on the following text, generate {num_questions} Multiple Choice Question(MCQs) and four options each and Answer:\n\n{combined_text}.\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Options:\*\*\n'
+        user_prompt = f"""{prompt}\n\nBased on the following text, generate {num_questions} Multiple Choice Question(MCQs) and four options each and Answer of {question_level} Difficulty Level, Also ensure the the questions are {bloom} based as per Bloom's Taxonomy:\n\n{combined_text}.The questions should be in this {language}.\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Options:\*\*\n'
                         r'a\) (.*?)\n'
                         r'b\) (.*?)\n'
                         r'c\) (.*?)\n'
                         r'd\) (.*?)\n'
                         r'\*\*Answer:\*\* (.*?)\n"""
     elif question_type == "Fill in the Blanks":
-        user_prompt = f"{prompt}\n\nBased on the following text,Strictly generate {num_questions}  fill in the blank questions only with correct answer. DO not Generate Descriptive or One word Question.The QUestion Should have a missing word replaced by blank that is the answer.:\n\n{combined_text}.\n\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Answer:\*\*\s(.*?)(?:\n\n|\n$)"
+        user_prompt = f"{prompt}\n\nBased on the following text,Strictly generate {num_questions} fill in the blank questions only with correct answer. DO not Generate Descriptive or One word Question.The Question Should have a missing word replaced by blank that is the answer and the Difficulty should {question_level},  Also ensure the the questions are {bloom} based as per Bloom's Taxonomy:\n\n{combined_text}.The questions should be in this {language}.\n\n The format of the output should match the following Regex- \*\*Question \d+:\*\* (.*?)\n\*\*Answer:\*\*\s(.*?)(?:\n\n|\n$)"
 
     try:
 
         if m == "Gemini":
             chat_session = model.start_chat(history=[{"role": "user", "parts": [user_prompt]}])
             response = chat_session.send_message(f"Please provide {num_questions} questions as requested, without any additional context.")
+
+            print(type(response.text))
             return response.text
 
         elif m == "Claude":
@@ -262,6 +265,8 @@ def generate_questions(model,m, combined_text, prompt, question_type, num_questi
             max_tokens = 1024,
             messages = [{"role":"user","content": user_prompt + "\n\nPlease provide questions as requested, without any additional context."}]
             )
+
+           
 
             return response.content[0].text
         
