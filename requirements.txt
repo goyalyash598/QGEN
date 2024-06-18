@@ -6,4 +6,8 @@ google-generativeai
 PyPDF2
 anthropic
 openai
-
+pytesseract
+pdfplumber
+numpy
+pandas
+requests
