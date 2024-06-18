@@ -7,10 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -21,28 +18,11 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install system dependencies on Ubuntu
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install system dependencies
       run: |
-        while IFS= read -r package; do
-          sudo apt-get install -y "$package"
-        done < packages.txt
+        sudo apt-get update
+        sudo apt-get install -y $(cat packages.txt)
       shell: bash
-
-    - name: Install system dependencies on macOS
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew update
-        while IFS= read -r package; do
-          brew install "$package"
-        done < packages.txt
-      shell: bash
-
-    - name: Install system dependencies on Windows
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install packages.config
-      shell: powershell
 
     - name: Install Python dependencies
       run: |
@@ -57,6 +37,9 @@ jobs:
     - name: Add secrets.toml
       run: |
         echo "${{ secrets.SECRETS_TOML }}" > ~/.streamlit/secrets.toml
+
+    - name: Set TESSDATA_PREFIX environment variable
+      run: echo "TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/" >> $GITHUB_ENV
 
     - name: Run Streamlit
       run: |
