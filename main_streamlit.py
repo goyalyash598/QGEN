@@ -1,6 +1,3 @@
-import os
-os.environ["TESSDATA_PREFIX"] = "C:/Program Files/Tesseract-OCR/tessdata/"  # Update with the correct path
-
 from PyPDF2 import PdfReader, PdfWriter
 import streamlit as st
 from pre_processing import *
@@ -8,6 +5,10 @@ from database import *
 from PIL import Image
 import pytesseract
 import pdfplumber
+import os
+
+# Import the custom OCR component
+import ocr_component
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
@@ -46,23 +47,13 @@ num_questions = st.sidebar.number_input("Number of questions to generate", min_v
 generate_questions_flag = st.sidebar.button("Generate Questions")
 json_object = None
 
-def ocr_from_pdf(file_path):
-    text = ""
-    with pdfplumber.open(file_path) as pdf:
-        for i, page in enumerate(pdf.pages):
-            image = page.to_image()
-            page_text = pytesseract.image_to_string(image.original, lang='hin')
-            text += page_text + "\n\n"  # Add some spacing between pages
-            print(f"Extracted text from page {i + 1}:\n{page_text}")
-            print("\n" + "="*80 + "\n")  # Separator for better readability
-    return text
-
 if generate_questions_flag:
     if input_type == "PDF File":
         if pdf_file != st.session_state.uploaded_pdf:
             with st.spinner("Extracting text and images from PDF..."):
                 if language == "Hindi":
-                    combined_text = ocr_from_pdf(pdf_file)
+                    # Use the custom OCR component for Hindi
+                    combined_text = ocr_component.ocr_from_pdf(pdf_file)
                 else:
                     combined_text = handle_pdf_file(pdf_file, model, m)
                 save_data_to_db(combined_text)
