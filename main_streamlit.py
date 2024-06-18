@@ -1,11 +1,12 @@
+import os
+os.environ["TESSDATA_PREFIX"] = "C:/Program Files/Tesseract-OCR/tessdata"  # Update with the correct path
+
 from PyPDF2 import PdfReader, PdfWriter
 import streamlit as st
 from pre_processing import *
 from database import *
 from PIL import Image
 import pytesseract
-import pdfplumber
-import os
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
 st.title("PDF/Text Question Generator")
@@ -51,7 +52,7 @@ def ocr_from_pdf(file_path):
             image = page.to_image()
             page_text = pytesseract.image_to_string(image.original, lang='hin')
             text += page_text + "\n\n"  # Add some spacing between pages
-            print(f"Extracted text from page {i + 1}:\n", page_text)
+            print(f"Extracted text from page {i + 1}:\n{page_text}")
             print("\n" + "="*80 + "\n")  # Separator for better readability
     return text
 
