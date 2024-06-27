@@ -125,7 +125,7 @@ if st.button("Send Accepted Questions to API"):
 
 st.sidebar.markdown("<h2>PDF Splitter</h2>", unsafe_allow_html=True)
 split_pdf_file = st.sidebar.file_uploader("Upload a PDF file for splitting", type=["pdf"])
-page_ranges = st.sidebar.text_input("Enter page ranges (e.g., 1-3, 4-5)")
+page_ranges = st.sidebar.text_input("Enter page ranges (e.g., 10-30, 40-60)")
 split_button = st.sidebar.button("Split PDF")
 
 def split_pdf(input_pdf, output_folder, page_range):
