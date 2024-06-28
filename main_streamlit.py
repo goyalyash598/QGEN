@@ -8,7 +8,7 @@ import pdfplumber
 import os
 
 st.set_page_config(page_title="My Streamlit App", page_icon="❓")
-st.title("PDF/Text Question Generator")
+st.title("📄 PDF/Text Question Generator")
 
 st.markdown("""Welcome to the PDF/Text Question Generator! This tool allows you to upload a PDF file or input text directly to generate detailed questions.""")
 
